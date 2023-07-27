@@ -207,12 +207,30 @@ public:
         // result type
         using R = decltype(std::declval<T&>() * std::declval<U&>());
         R accum{};
-        for_constexpr<N+1>([&](auto ic) {
-            if(ic)
+        for(size_t i=0; i<=N; ++i) {
+            if(i)
                 accum *= x;
-            accum += (*this)[N-ic];
-        });
+            accum += (*this)[N-i];
+        }
         return accum;
+    }
+
+    constexpr Polynomial<T, std::max(N,size_t(1))-1> derivative() const {
+        if constexpr (N == 0)
+            return {}; // zero
+        Polynomial<T, std::max(N,size_t(1))-1> out;
+        for(size_t i=0; i<N; ++i) {
+            out[i] = (i+1) * (*this)[i+1];
+        }
+        return out;
+    }
+
+    constexpr Polynomial<T, N+1> integral() const {
+        Polynomial<T, N+1> out;
+        for(size_t i=0; i<=N; ++i) {
+            out[i+1] = (*this)[i] / (i+1);
+        }
+        return out;
     }
 };
 
@@ -316,6 +334,12 @@ public:
 
     constexpr auto normalize() const {
         return RationalPolynomial<T, NP, NQ>{p / q[NQ], q / q[NQ]};
+    }
+
+    // Evaluate polynomial at point.
+    template <typename U>
+    constexpr auto operator()(U const &x) const {
+        return p(x) / q(x);
     }
 };
 
