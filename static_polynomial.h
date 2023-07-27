@@ -15,6 +15,8 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+#pragma once
+
 #include <iostream>
 #include <array>
 #include <cassert>
@@ -75,7 +77,7 @@ public:
 
     template <size_t M>
     constexpr Polynomial<T, std::max(M, N)> operator+(Polynomial<T, M> const &o) const {
-        if constexpr(N > M) {
+        if constexpr(M <= N) {
             return Polynomial<T, N>{*this} += o;
         } else {
             return o + *this;
@@ -97,6 +99,15 @@ public:
 
     constexpr Polynomial<T, N> operator-(Polynomial<T, N> const &o) const {
         return Polynomial<T, N>{*this} -= o;
+    }
+
+    constexpr Polynomial<T, N> &operator-=(T s) {
+        (*this)[0] -= s;
+        return *this;
+    }
+
+    constexpr Polynomial<T, N> operator-(T s) const {
+        return Polynomial<T, N>{*this} -= s;
     }
 
     constexpr Polynomial<T, N> operator-() const {
